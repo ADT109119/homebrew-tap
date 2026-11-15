@@ -8,6 +8,8 @@ Official Homebrew tap for [行魚輸入法 (XingYu IME)](https://github.com/ADT1
 brew install --cask ADT109119/tap/xingyu-ime
 ```
 
+> If Homebrew 7.x+ prompts that the tap is untrusted, run `brew trust ADT109119/tap` first.
+
 Or tap first:
 
 ```bash
