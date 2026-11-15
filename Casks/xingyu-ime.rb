@@ -14,39 +14,19 @@ cask "xingyu-ime" do
 
   preflight_steps do
     terminate_process "XingYuIME"
+    run "/usr/bin/xattr",
+        args:         ["-dr", "com.apple.quarantine", "{{staged_path}}/XingYuIME.app"],
+        must_succeed: false
   end
 
   postflight_steps do
-    run "/usr/bin/xattr",
-        args:           ["-cr", "{{home}}/Library/Input Methods/XingYuIME.app"],
-        writable_paths: ["{{home}}/Library/Input Methods/XingYuIME.app"],
-        must_succeed:   false
-
-    run "/usr/bin/swift",
-        args:         [
-          "-e",
-          <<~SWIFT,
-            import Carbon
-            import Foundation
-            let appPath = NSString("~/Library/Input Methods/XingYuIME.app").expandingTildeInPath
-            let url = URL(fileURLWithPath: appPath)
-            _ = TISRegisterInputSource(url as CFURL)
-            let filter = [kTISPropertyBundleID as String: "com.jerryyen.inputmethod.XingYuIME"] as CFDictionary
-            if let list = TISCreateInputSourceList(filter, true)?.takeRetainedValue() as? [TISInputSource] {
-                for s in list {
-                    _ = TISEnableInputSource(s)
-                }
-            }
-          SWIFT
-        ],
-        must_succeed: false
-
     run "/usr/bin/python3",
         args:           [
           "-c",
           <<~PYTHON,
-            import os, plistlib
-            plist_path = os.path.expanduser("~/Library/Preferences/com.apple.HIToolbox.plist")
+            import os, plistlib, pwd
+            real_home = pwd.getpwuid(os.getuid()).pw_dir
+            plist_path = os.path.join(real_home, "Library/Preferences/com.apple.HIToolbox.plist")
             if os.path.exists(plist_path):
                 with open(plist_path, "rb") as f:
                     data = plistlib.load(f)
@@ -62,7 +42,8 @@ cask "xingyu-ime" do
                     plistlib.dump(data, f)
           PYTHON
         ],
-        writable_paths: ["{{home}}/Library/Preferences"],
+        writable_paths: ["Library/Preferences"],
+        writable_base:  :home,
         must_succeed:   false
 
     terminate_process "TextInputMenuAgent"
@@ -70,8 +51,7 @@ cask "xingyu-ime" do
   end
 
   uninstall quit:   "com.jerryyen.inputmethod.XingYuIME",
-            signal: ["TERM", "XingYuIME"],
-            delete: "~/Library/Input Methods/XingYuIME.app"
+            signal: ["TERM", "XingYuIME"]
 
   zap trash: [
     "~/Library/Application Support/XingYuIME",
