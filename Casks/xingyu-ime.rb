@@ -1,6 +1,6 @@
 cask "xingyu-ime" do
-  version "1.0.3"
-  sha256 "cc93998c08479fcff1263f4ee62d32a5fb051a8011251a4e00d296e03bb4fc24"
+  version \"1.0.4\"
+  sha256 \"77c4124c4d7133b69c02b0d0886d882dfc60b8fb8526cbef8aff0fdd2f5b303d\"
 
   url "https://github.com/ADT109119/XingYu-IME/releases/download/v#{version}/XingYuIME-#{version}-universal.zip"
   name "行魚輸入法"
